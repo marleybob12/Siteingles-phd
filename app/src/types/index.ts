@@ -32,7 +32,7 @@ export interface Notification {
   resolved: boolean; // Nova flag para notificações resolvidas
   resolution?: 'aprovado' | 'rejeitado'; // Tipo de resolução
   createdAt: Date;
-  data?: any;
+  data?: unknown;
 }
 
 export interface Activity {
