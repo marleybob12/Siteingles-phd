@@ -1,7 +1,13 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import { Badge } from '@/components/ui/badge';
 import { CheckCircle, XCircle } from 'lucide-react';
 
 export function ResolvedNotificationItem({ notification }: any) {
+// Retorna JSX para renderização do componente.
   return (
     <div className="p-6 opacity-60 hover:opacity-100 transition-all">
       <div className="flex items-start gap-5">

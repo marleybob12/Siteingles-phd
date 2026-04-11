@@ -1,37 +1,52 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import * as React from "react"
 import * as DialogPrimitive from "@radix-ui/react-dialog"
 import { XIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Função Dialog responsável por lógica reutilizável.
 function Dialog({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Root>) {
+// Retorna o valor calculado pela função.
   return <DialogPrimitive.Root data-slot="dialog" {...props} />
 }
 
+// Função DialogTrigger responsável por lógica reutilizável.
 function DialogTrigger({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Trigger>) {
+// Retorna o valor calculado pela função.
   return <DialogPrimitive.Trigger data-slot="dialog-trigger" {...props} />
 }
 
+// Função DialogPortal responsável por lógica reutilizável.
 function DialogPortal({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Portal>) {
+// Retorna o valor calculado pela função.
   return <DialogPrimitive.Portal data-slot="dialog-portal" {...props} />
 }
 
+// Função DialogClose responsável por lógica reutilizável.
 function DialogClose({
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Close>) {
+// Retorna o valor calculado pela função.
   return <DialogPrimitive.Close data-slot="dialog-close" {...props} />
 }
 
+// Função DialogOverlay responsável por lógica reutilizável.
 function DialogOverlay({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Overlay>) {
+// Retorna JSX para renderização do componente.
   return (
     <DialogPrimitive.Overlay
       data-slot="dialog-overlay"
@@ -44,6 +59,7 @@ function DialogOverlay({
   )
 }
 
+// Função DialogContent responsável por lógica reutilizável.
 function DialogContent({
   className,
   children,
@@ -52,6 +68,7 @@ function DialogContent({
 }: React.ComponentProps<typeof DialogPrimitive.Content> & {
   showCloseButton?: boolean
 }) {
+// Retorna JSX para renderização do componente.
   return (
     <DialogPortal data-slot="dialog-portal">
       <DialogOverlay />
@@ -78,7 +95,9 @@ function DialogContent({
   )
 }
 
+// Função DialogHeader responsável por lógica reutilizável.
 function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
+// Retorna JSX para renderização do componente.
   return (
     <div
       data-slot="dialog-header"
@@ -88,7 +107,9 @@ function DialogHeader({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Função DialogFooter responsável por lógica reutilizável.
 function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
+// Retorna JSX para renderização do componente.
   return (
     <div
       data-slot="dialog-footer"
@@ -101,10 +122,12 @@ function DialogFooter({ className, ...props }: React.ComponentProps<"div">) {
   )
 }
 
+// Função DialogTitle responsável por lógica reutilizável.
 function DialogTitle({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Title>) {
+// Retorna JSX para renderização do componente.
   return (
     <DialogPrimitive.Title
       data-slot="dialog-title"
@@ -114,10 +137,12 @@ function DialogTitle({
   )
 }
 
+// Função DialogDescription responsável por lógica reutilizável.
 function DialogDescription({
   className,
   ...props
 }: React.ComponentProps<typeof DialogPrimitive.Description>) {
+// Retorna JSX para renderização do componente.
   return (
     <DialogPrimitive.Description
       data-slot="dialog-description"

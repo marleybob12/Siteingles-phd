@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa componentes de animação do Framer Motion.
 import { motion } from 'framer-motion';
 import { Check, ArrowRight } from 'lucide-react';
 import { MODULES } from '../constants';
@@ -15,6 +21,7 @@ interface ModuleCardProps {
 export function ModuleCard({ module, isSelected, onSelect, onSubscribe, index }: ModuleCardProps) {
   const isLime = module.color === 'lime';
 
+// Retorna JSX para renderização do componente.
   return (
     <motion.div
       initial={{ opacity: 0, y: 30 }}

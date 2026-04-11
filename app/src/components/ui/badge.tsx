@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import * as React from "react"
 import { Slot } from "@radix-ui/react-slot"
 import { cva, type VariantProps } from "class-variance-authority"
@@ -25,6 +30,7 @@ const badgeVariants = cva(
   }
 )
 
+// Função Badge responsável por lógica reutilizável.
 function Badge({
   className,
   variant,
@@ -34,6 +40,7 @@ function Badge({
   VariantProps<typeof badgeVariants> & { asChild?: boolean }) {
   const Comp = asChild ? Slot : "span"
 
+// Retorna JSX para renderização do componente.
   return (
     <Comp
       data-slot="badge"

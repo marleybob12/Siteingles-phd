@@ -1,35 +1,60 @@
+/**
+ * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState, useEffect } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useCursorEffect } from '@/hooks/useCursorEffect';
+// Importa tipo(s) UserRole para tipagem do TypeScript.
 import type { UserRole } from '@/types';
 
 export type Step = 'curso' | 'dados';
 
 export function useRegister() {
+// Declara estado step e setter setStep.
   const [step, setStep] = useState<Step>('curso');
+// Declara estado inglesAtivado e setter setInglesAtivado.
   const [inglesAtivado, setInglesAtivado] = useState(false);
+// Declara estado enemAtivado e setter setEnemAtivado.
   const [enemAtivado, setEnemAtivado] = useState(false);
+// Declara estado moduloSelecionado e setter setModuloSelecionado.
   const [moduloSelecionado, setModuloSelecionado] = useState('');
+// Declara estado preSelected e setter setPreSelected.
   const [preSelected, setPreSelected] = useState(false);
 
+// Declara estado email e setter setEmail.
   const [email, setEmail] = useState('');
+// Declara estado senha e setter setSenha.
   const [senha, setSenha] = useState('');
+// Declara estado documento e setter setDocumento.
   const [documento, setDocumento] = useState('');
+// Declara estado perfil e setter setPerfil.
   const [perfil, setPerfil] = useState<UserRole>(null);
+// Declara estado codigoProfessor e setter setCodigoProfessor.
   const [codigoProfessor, setCodigoProfessor] = useState('');
+// Declara estado showPassword e setter setShowPassword.
   const [showPassword, setShowPassword] = useState(false);
+// Declara estado isLoading e setter setIsLoading.
   const [isLoading, setIsLoading] = useState(false);
+// Declara estado error e setter setError.
   const [error, setError] = useState('');
+// Declara estado success e setter setSuccess.
   const [success, setSuccess] = useState(false);
 
+// Declara estado codigoValido e setter setCodigoValido.
   const [codigoValido, setCodigoValido] = useState<boolean | null>(null);
+// Declara estado validandoCodigo e setter setValidandoCodigo.
   const [validandoCodigo, setValidandoCodigo] = useState(false);
 
+// Extrai valores e funções do hook AuthStore.
   const { register, getProfessorByCodigo } = useAuthStore();
 
   useCursorEffect();
 
   // Pre-select course from sessionStorage
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     const curso = sessionStorage.getItem('cursoAdquirido') as 'ingles' | 'enem' | null;
     const modulo = sessionStorage.getItem('moduloAdquirido');
@@ -43,6 +68,7 @@ export function useRegister() {
   }, []);
 
   // Validate professor code with debounce
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     if (perfil === 'aluno' && codigoProfessor.trim().length >= 10) {
       setValidandoCodigo(true);
@@ -51,17 +77,20 @@ export function useRegister() {
         setCodigoValido(!!professor);
         setValidandoCodigo(false);
       }, 500);
+// Retorna JSX para renderização do componente.
       return () => clearTimeout(timer);
     } else {
       setCodigoValido(null);
     }
   }, [codigoProfessor, perfil, getProfessorByCodigo]);
 
+// Declara função handleIsProfessor que processa dados ou eventos.
   const handleIsProfessor = () => {
     setPerfil('professor');
     setStep('dados');
   };
 
+// Declara função handleCourseNext que processa dados ou eventos.
   const handleCourseNext = () => {
     setError('');
     if (!inglesAtivado && !enemAtivado) {
@@ -105,6 +134,7 @@ export function useRegister() {
     }
   };
 
+// Retorna objeto ou estado dentro da função.
   return {
     step, setStep,
     inglesAtivado, setInglesAtivado,

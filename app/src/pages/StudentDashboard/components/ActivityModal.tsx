@@ -1,4 +1,10 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import React, { useState, useEffect } from 'react';
+// Importa componentes de animação do Framer Motion.
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -6,14 +12,20 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileText, Clock, Paperclip, CheckCircle, RotateCcw, Send } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { CorrectionStatusBadge } from '@/components/shared/CorrectionStatusBadge';
+// Importa tipo(s) Activity para tipagem do TypeScript.
 import type { Activity } from '@/types';
 
 export function ActivityModal({ isOpen, onClose, activity }: { isOpen: boolean; onClose: () => void; activity: Activity | null }) {
+// Declara estado resposta e setter setResposta.
   const [resposta, setResposta] = useState('');
+// Declara estado isSubmitting e setter setIsSubmitting.
   const [isSubmitting, setIsSubmitting] = useState(false);
+// Declara estado submitted e setter setSubmitted.
   const [submitted, setSubmitted] = useState(false);
+// Extrai valores e funções do hook AuthStore.
   const { currentUser, responderAtividade } = useAuthStore() as any;
 
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     if (!isOpen) { setResposta(''); setSubmitted(false); setIsSubmitting(false); }
   }, [isOpen]);
@@ -31,6 +43,7 @@ export function ActivityModal({ isOpen, onClose, activity }: { isOpen: boolean; 
     setTimeout(onClose, 1500);
   };
 
+// Retorna JSX para renderização do componente.
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-0 overflow-hidden flex flex-col max-h-[90vh] cursor-default">

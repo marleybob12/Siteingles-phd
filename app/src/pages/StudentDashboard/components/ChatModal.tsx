@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import React, { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,22 +12,26 @@ import { useAuthStore } from '@/store/authStore';
 import { Avatar } from '@/components/shared/Avatar';
 
 export function ChatModal({ isOpen, onClose, professor }: { isOpen: boolean; onClose: () => void; professor: any }) {
+// Declara estado msg e setter setMsg.
   const [msg, setMsg] = useState('');
   const scrollRef = useRef<HTMLDivElement>(null);
   const store = useAuthStore() as any;
   const { currentUser, mensagens, enviarMensagem } = store;
 
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [mensagens, isOpen]);
 
   if (!professor || !currentUser) return null;
 
+// Declara função chatMsgs que processa dados ou eventos.
   const chatMsgs = (mensagens || []).filter((m: any) =>
     (m.fromId === currentUser.id && m.toId === professor.id) ||
     (m.fromId === professor.id && m.toId === currentUser.id)
   ).sort((a: any, b: any) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime());
 
+// Declara função handleSend que processa dados ou eventos.
   const handleSend = (e: React.FormEvent) => {
     e.preventDefault();
     if (!msg.trim()) return;
@@ -30,6 +39,7 @@ export function ChatModal({ isOpen, onClose, professor }: { isOpen: boolean; onC
     setMsg('');
   };
 
+// Retorna JSX para renderização do componente.
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-3xl h-[80vh] bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-0 overflow-hidden flex flex-col cursor-default">

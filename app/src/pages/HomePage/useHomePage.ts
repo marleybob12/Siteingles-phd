@@ -1,13 +1,24 @@
+/**
+ * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState, useEffect, useRef } from 'react';
 
 export function useHomePage() {
+// Declara estado isScrolled e setter setIsScrolled.
   const [isScrolled, setIsScrolled] = useState(false);
+// Declara estado mobileMenuOpen e setter setMobileMenuOpen.
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
+// Declara estado scrollProgress e setter setScrollProgress.
   const [scrollProgress, setScrollProgress] = useState(0);
   const contactSectionRef = useRef<HTMLElement>(null);
 
   // Scroll progress + nav shrink
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
+// Declara função handleScroll que processa dados ou eventos.
     const handleScroll = () => {
       const scrollTop = document.documentElement.scrollTop || document.body.scrollTop;
       const scrollHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
@@ -15,10 +26,12 @@ export function useHomePage() {
       setIsScrolled(scrollTop > 100);
     };
     window.addEventListener('scroll', handleScroll, { passive: true });
+// Retorna JSX para renderização do componente.
     return () => window.removeEventListener('scroll', handleScroll);
   }, []);
 
   // Reveal on scroll (IntersectionObserver)
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     const elements = document.querySelectorAll('.reveal-element');
     const observer = new IntersectionObserver(
@@ -28,47 +41,57 @@ export function useHomePage() {
       { threshold: 0.1, rootMargin: '0px 0px -50px 0px' }
     );
     elements.forEach((el) => observer.observe(el));
+// Retorna JSX para renderização do componente.
     return () => observer.disconnect();
   }, []);
 
   // Spotlight effect on contact section
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     const section = contactSectionRef.current;
     const spotlight = section?.querySelector('.spotlight') as HTMLElement | null;
     if (!section || !spotlight) return;
+// Declara função onMove que processa dados ou eventos.
     const onMove = (e: MouseEvent) => {
       const rect = section.getBoundingClientRect();
       spotlight.style.setProperty('--x', ((e.clientX - rect.left) / rect.width) * 100 + '%');
       spotlight.style.setProperty('--y', ((e.clientY - rect.top) / rect.height) * 100 + '%');
     };
     section.addEventListener('mousemove', onMove);
+// Retorna JSX para renderização do componente.
     return () => section.removeEventListener('mousemove', onMove);
   }, []);
 
   // Magnetic buttons
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     const btns: { el: HTMLElement; move: (e: MouseEvent) => void; leave: () => void }[] = [];
     document.querySelectorAll<HTMLElement>('.magnetic-btn').forEach((btn) => {
+// Declara função move que processa dados ou eventos.
       const move = (e: MouseEvent) => {
         const r = btn.getBoundingClientRect();
         btn.style.transform = `translate(${(e.clientX - r.left - r.width / 2) * 0.2}px, ${(e.clientY - r.top - r.height / 2) * 0.2}px)`;
       };
+// Declara função leave que processa dados ou eventos.
       const leave = () => { btn.style.transform = 'translate(0,0)'; };
       btn.addEventListener('mousemove', move);
       btn.addEventListener('mouseleave', leave);
       btns.push({ el: btn, move, leave });
     });
+// Retorna JSX para renderização do componente.
     return () => btns.forEach(({ el, move, leave }) => {
       el.removeEventListener('mousemove', move);
       el.removeEventListener('mouseleave', leave);
     });
   }, []);
 
+// Declara função scrollTo que processa dados ou eventos.
   const scrollTo = (id: string) => {
     document.getElementById(id)?.scrollIntoView({ behavior: 'smooth', block: 'start' });
     setMobileMenuOpen(false);
   };
 
+// Declara função handleContactFormSubmit que processa dados ou eventos.
   const handleContactFormSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     const n = document.createElement('div');
@@ -90,6 +113,7 @@ export function useHomePage() {
     (e.target as HTMLFormElement).reset();
   };
 
+// Retorna objeto ou estado dentro da função.
   return {
     isScrolled,
     mobileMenuOpen,

@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,10 +10,12 @@ import * as TabsPrimitive from "@radix-ui/react-tabs"
 
 import { cn } from "@/lib/utils"
 
+// Função Tabs responsável por lógica reutilizável.
 function Tabs({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Root>) {
+// Retorna JSX para renderização do componente.
   return (
     <TabsPrimitive.Root
       data-slot="tabs"
@@ -18,10 +25,12 @@ function Tabs({
   )
 }
 
+// Função TabsList responsável por lógica reutilizável.
 function TabsList({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.List>) {
+// Retorna JSX para renderização do componente.
   return (
     <TabsPrimitive.List
       data-slot="tabs-list"
@@ -34,10 +43,12 @@ function TabsList({
   )
 }
 
+// Função TabsTrigger responsável por lógica reutilizável.
 function TabsTrigger({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Trigger>) {
+// Retorna JSX para renderização do componente.
   return (
     <TabsPrimitive.Trigger
       data-slot="tabs-trigger"
@@ -50,10 +61,12 @@ function TabsTrigger({
   )
 }
 
+// Função TabsContent responsável por lógica reutilizável.
 function TabsContent({
   className,
   ...props
 }: React.ComponentProps<typeof TabsPrimitive.Content>) {
+// Retorna JSX para renderização do componente.
   return (
     <TabsPrimitive.Content
       data-slot="tabs-content"

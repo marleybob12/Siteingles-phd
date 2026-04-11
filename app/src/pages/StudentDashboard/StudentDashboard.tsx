@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa componentes de animação do Framer Motion.
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Bell, LogOut, BookOpen, FileText, MessageSquare, Clock, ChevronRight, AlertCircle, CheckCircle, Trophy, TrendingUp, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -8,10 +14,12 @@ import { CorrectionStatusBadge } from '@/components/shared/CorrectionStatusBadge
 import { ActivityModal } from './components/ActivityModal';
 import { ChatModal } from './components/ChatModal';
 import { useStudentDashboard } from './useStudentDashboard';
+// Importa tipo(s) Activity para tipagem do TypeScript.
 import type { Activity } from '@/types';
 
 interface StudentDashboardProps { onLogout: () => void; }
 
+// Componente React StudentDashboard que renderiza o conteúdo desta página.
 export default function StudentDashboard({ onLogout }: StudentDashboardProps) {
   const {
     activeTab, setActiveTab,
@@ -27,6 +35,7 @@ export default function StudentDashboard({ onLogout }: StudentDashboardProps) {
     handleActivityClick,
   } = useStudentDashboard();
 
+// Retorna JSX para renderização do componente.
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-brand-neon selection:text-black font-sans relative overflow-hidden cursor-default">
       <style>{`

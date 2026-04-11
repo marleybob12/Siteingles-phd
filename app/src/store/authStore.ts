@@ -1,5 +1,11 @@
+/**
+ * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
+// Importa tipo(s) User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation para tipagem do TypeScript.
 import type { User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation } from '@/types';
 
 interface AuthState {
@@ -53,11 +59,13 @@ const generateProfessorCode = (): string => {
   for (let i = 0; i < 6; i++) {
     code += chars.charAt(Math.floor(Math.random() * chars.length));
   }
+// Retorna o valor calculado pela função.
   return code;
 };
 
 // Check if code already exists
 const isCodeUnique = (code: string, users: User[]): boolean => {
+// Retorna o valor calculado pela função.
   return !users.some(u => u.role === 'professor' && u.codigo === code);
 };
 
@@ -67,6 +75,7 @@ const generateUniqueCode = (users: User[]): string => {
   while (!isCodeUnique(code, users)) {
     code = generateProfessorCode();
   }
+// Retorna o valor calculado pela função.
   return code;
 };
 
@@ -97,10 +106,12 @@ export const useAuthStore = create<AuthState>()(
         const user = users.find(u => u.email === email);
         
         if (!user) {
+// Retorna objeto ou estado dentro da função.
           return { success: false, message: 'Usuário não encontrado' };
         }
         
         set({ currentUser: user, isAuthenticated: true });
+// Retorna objeto ou estado dentro da função.
         return { success: true };
       },
 
@@ -108,6 +119,7 @@ export const useAuthStore = create<AuthState>()(
         const { users } = get();
         
         if (users.some(u => u.email === userData.email)) {
+// Retorna objeto ou estado dentro da função.
           return { success: false, message: 'Email já cadastrado' };
         }
 
@@ -116,6 +128,7 @@ export const useAuthStore = create<AuthState>()(
           const professor = users.find(u => u.role === 'professor' && u.codigo === userData.codigoProfessor);
           
           if (!professor) {
+// Retorna objeto ou estado dentro da função.
             return { success: false, message: 'Código do professor inválido' };
           }
 
@@ -150,6 +163,7 @@ export const useAuthStore = create<AuthState>()(
           set(state => ({ notifications: [...state.notifications, notification] }));
 
           set({ currentUser: newUser, isAuthenticated: true });
+// Retorna objeto ou estado dentro da função.
           return { success: true };
         }
 
@@ -170,9 +184,11 @@ export const useAuthStore = create<AuthState>()(
 
           set({ users: [...users, newUser] });
           set({ currentUser: newUser, isAuthenticated: true });
+// Retorna objeto ou estado dentro da função.
           return { success: true };
         }
 
+// Retorna objeto ou estado dentro da função.
         return { success: false, message: 'Perfil inválido' };
       },
 
@@ -348,21 +364,25 @@ export const useAuthStore = create<AuthState>()(
 
       getUnreadNotifications: (userId) => {
         const { notifications } = get();
+// Retorna o valor calculado pela função.
         return notifications.filter(n => n.userId === userId && !n.read);
       },
 
       getPendingNotifications: (userId) => {
         const { notifications } = get();
+// Retorna o valor calculado pela função.
         return notifications.filter(n => n.userId === userId && !n.resolved).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       },
 
       getResolvedNotifications: (userId) => {
         const { notifications } = get();
+// Retorna o valor calculado pela função.
         return notifications.filter(n => n.userId === userId && n.resolved).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
       },
 
       getAlunosByProfessor: (professorId) => {
         const { users } = get();
+// Retorna o valor calculado pela função.
         return users.filter(u => 
           u.role === 'aluno' && u.professorId === professorId && u.status === 'aprovado'
         );
@@ -370,16 +390,19 @@ export const useAuthStore = create<AuthState>()(
 
       getAtividadesByAluno: (alunoId) => {
         const { activities } = get();
+// Retorna o valor calculado pela função.
         return activities.filter(a => a.alunoId === alunoId);
       },
 
       getAtividadesByProfessor: (professorId) => {
         const { activities } = get();
+// Retorna o valor calculado pela função.
         return activities.filter(a => a.professorId === professorId);
       },
 
       getMensagensByAluno: (alunoId, professorId) => {
         const { messages } = get();
+// Retorna o valor calculado pela função.
         return messages.filter(m => 
           (m.senderId === alunoId && m.receiverId === professorId) ||
           (m.senderId === professorId && m.receiverId === alunoId)
@@ -390,6 +413,7 @@ export const useAuthStore = create<AuthState>()(
         const { messages, users } = get();
         const alunos = users.filter(u => u.role === 'aluno' && u.professorId === professorId);
         
+// Retorna o valor calculado pela função.
         return alunos.map(aluno => {
           const msgs = messages.filter(m => 
             (m.senderId === aluno.id && m.receiverId === professorId) ||
@@ -399,6 +423,7 @@ export const useAuthStore = create<AuthState>()(
           const ultima = msgs[0];
           const naoLidas = msgs.filter(m => m.receiverId === professorId && !m.read).length;
 
+// Retorna objeto ou estado dentro da função.
           return {
             alunoId: aluno.id,
             alunoNome: aluno.nome,
@@ -411,17 +436,20 @@ export const useAuthStore = create<AuthState>()(
 
       getProfessorByCodigo: (codigo) => {
         const { users } = get();
+// Retorna o valor calculado pela função.
         return users.find(u => u.role === 'professor' && u.codigo === codigo);
       },
 
       getProfessorCode: (professorId) => {
         const { users } = get();
         const professor = users.find(u => u.id === professorId && u.role === 'professor');
+// Retorna o valor calculado pela função.
         return professor?.codigo;
       },
 
       getAlunoById: (alunoId) => {
         const { users } = get();
+// Retorna o valor calculado pela função.
         return users.find(u => u.id === alunoId && u.role === 'aluno');
       },
     }),
@@ -429,6 +457,7 @@ export const useAuthStore = create<AuthState>()(
       name: 'eduplatform-storage',
       onRehydrateStorage: () => (state) => {
       if (!state) return;
+// Declara função toDate que processa dados ou eventos.
       const toDate = (v: any) => v ? new Date(v) : v;
       state.notifications = state.notifications.map(n => ({ ...n, createdAt: toDate(n.createdAt) }));
       state.activities = state.activities.map(a => ({ ...a, createdAt: toDate(a.createdAt) }));

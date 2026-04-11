@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Função avatarColor responsável por lógica reutilizável.
 function avatarColor(nome: string): string {
   const colors = [
     'bg-brand-green/20 text-brand-green border-brand-green/30',
@@ -8,6 +14,7 @@ function avatarColor(nome: string): string {
   ];
   let hash = 0;
   for (let i = 0; i < nome.length; i++) hash = nome.charCodeAt(i) + ((hash << 5) - hash);
+// Retorna o valor calculado pela função.
   return colors[Math.abs(hash) % colors.length];
 }
 
@@ -18,6 +25,7 @@ interface AvatarProps {
 
 export function Avatar({ nome, size = 'md' }: AvatarProps) {
   const sz = size === 'sm' ? 'w-8 h-8 text-xs' : size === 'lg' ? 'w-14 h-14 text-xl' : 'w-11 h-11 text-sm';
+// Retorna JSX para renderização do componente.
   return (
     <div className={`${sz} ${avatarColor(nome)} rounded-xl border flex items-center justify-center font-bold shrink-0 backdrop-blur-sm`}>
       {nome.charAt(0).toUpperCase()}

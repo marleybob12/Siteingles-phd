@@ -1,6 +1,14 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState } from 'react';
+// Importa componentes de animação do Framer Motion.
 import { motion } from 'framer-motion';
 import { GraduationCap, ArrowLeft, Sparkles } from 'lucide-react';
+// Importa tipo(s) Page para tipagem do TypeScript.
 import type { Page } from '@/App';
 import { useCursorEffect } from '@/hooks/useCursorEffect';
 import { ModuleCard } from './components/ModuleCard';
@@ -10,10 +18,13 @@ interface EnglishModulesPageProps {
   navigateTo: (page: Page) => void;
 }
 
+// Componente React EnglishModulesPage que renderiza o conteúdo desta página.
 export default function EnglishModulesPage({ navigateTo }: EnglishModulesPageProps) {
+// Declara estado selectedModule e setter setSelectedModule.
   const [selectedModule, setSelectedModule] = useState<number | null>(null);
   useCursorEffect();
 
+// Retorna JSX para renderização do componente.
   return (
     <div className="min-h-screen bg-[#050505] text-white font-sans selection:bg-brand-green selection:text-black overflow-x-hidden">
       <div className="noise-overlay" />

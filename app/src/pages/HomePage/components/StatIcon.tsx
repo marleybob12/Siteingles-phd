@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 interface StatIconProps {
   name: string;
   color: string;
@@ -7,6 +12,7 @@ interface StatIconProps {
 
 export function StatIcon({ name, color, size = 'w-5 h-5', featured = false }: StatIconProps) {
   const cls = `${size} ${featured ? 'group-hover:text-black' : ''} ${color}`;
+// Declara objeto base usado para configuração ou estado.
   const base = {
     xmlns: 'http://www.w3.org/2000/svg',
     className: cls,

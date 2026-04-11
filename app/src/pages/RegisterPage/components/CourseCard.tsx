@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 interface CourseCardProps {
   title: string;
   icon: React.ReactNode;
@@ -6,6 +11,7 @@ interface CourseCardProps {
 }
 
 export function CourseCard({ title, icon, active, onClick }: CourseCardProps) {
+// Retorna JSX para renderização do componente.
   return (
     <button
       type="button"

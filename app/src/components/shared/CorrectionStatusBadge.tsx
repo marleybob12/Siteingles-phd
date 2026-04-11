@@ -1,4 +1,10 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import { Badge } from '@/components/ui/badge';
+// Importa tipo(s) ActivityCorrectionStatus para tipagem do TypeScript.
 import type { ActivityCorrectionStatus } from '@/types';
 
 interface CorrectionStatusBadgeProps {
@@ -15,6 +21,7 @@ const STATUS_CONFIG: Record<ActivityCorrectionStatus, { label: string; className
 
 export function CorrectionStatusBadge({ status }: CorrectionStatusBadgeProps) {
   const { label, className } = STATUS_CONFIG[status];
+// Retorna JSX para renderização do componente.
   return (
     <Badge className={`text-[10px] font-black uppercase tracking-widest px-3 py-1 ${className}`}>
       {label}

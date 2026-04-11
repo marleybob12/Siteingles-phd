@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -5,14 +11,18 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileText, Clock, Paperclip, CheckCircle, XCircle, RotateCcw, UserCircle } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { CorrectionStatusBadge } from '@/components/shared/CorrectionStatusBadge';
+// Importa tipo(s) Activity, ActivityCorrectionStatus para tipagem do TypeScript.
 import type { Activity, ActivityCorrectionStatus } from '@/types';
 
 export function ActivityDetailModal({ isOpen, onClose, activity, onCorrigir }: { isOpen: boolean; onClose: () => void; activity: Activity | null; onCorrigir: (status: ActivityCorrectionStatus, feedback?: string) => void }) {
+// Declara estado feedback e setter setFeedback.
   const [feedback, setFeedback] = useState('');
+// Extrai valores e funções do hook AuthStore.
   const { getAlunoById } = useAuthStore();
   const aluno = activity ? getAlunoById(activity.alunoId) : null;
   if (!activity) return null;
 
+// Retorna JSX para renderização do componente.
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-0 overflow-hidden flex flex-col max-h-[90vh] cursor-default">

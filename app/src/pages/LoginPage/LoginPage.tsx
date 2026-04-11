@@ -1,8 +1,15 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa componentes de animação do Framer Motion.
 import { motion } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+// Importa tipo(s) Page para tipagem do TypeScript.
 import type { Page } from '@/App';
 import { useLogin } from './useLogin';
 
@@ -10,6 +17,7 @@ interface LoginPageProps {
   navigateTo: (page: Page) => void;
 }
 
+// Componente React LoginPage que renderiza o conteúdo desta página.
 export default function LoginPage({ navigateTo }: LoginPageProps) {
   const {
     email, setEmail, senha, setSenha,
@@ -17,6 +25,7 @@ export default function LoginPage({ navigateTo }: LoginPageProps) {
     isLoading, error, handleSubmit,
   } = useLogin();
 
+// Retorna JSX para renderização do componente.
   return (
     <div className="min-h-screen bg-[#050505] flex">
       <div className="noise-overlay" />

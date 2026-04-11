@@ -1,8 +1,15 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Função Input responsável por lógica reutilizável.
 function Input({ className, type, ...props }: React.ComponentProps<"input">) {
+// Retorna JSX para renderização do componente.
   return (
     <input
       type={type}

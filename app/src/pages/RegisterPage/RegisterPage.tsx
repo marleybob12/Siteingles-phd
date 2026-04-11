@@ -1,9 +1,16 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa componentes de animação do Framer Motion.
 import { motion, AnimatePresence } from 'framer-motion';
 import { Eye, EyeOff, ArrowLeft, Mail, Lock, FileText, User, Check, X, Target, Globe } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { RadioGroup, RadioGroupItem } from '@/components/ui/radio-group';
+// Importa tipo(s) Page para tipagem do TypeScript.
 import type { Page } from '@/App';
 import { useRegister } from './useRegister';
 import { CourseCard } from './components/CourseCard';
@@ -13,6 +20,7 @@ interface RegisterPageProps {
   navigateTo: (page: Page) => void;
 }
 
+// Componente React RegisterPage que renderiza o conteúdo desta página.
 export default function RegisterPage({ navigateTo }: RegisterPageProps) {
   const {
     step, setStep,
@@ -30,6 +38,7 @@ export default function RegisterPage({ navigateTo }: RegisterPageProps) {
   } = useRegister();
 
   if (success) {
+// Retorna JSX para renderização do componente.
     return (
       <div className="min-h-screen flex items-center justify-center bg-[#050505] px-4 relative overflow-hidden">
         <div className="noise-overlay" />
@@ -48,6 +57,7 @@ export default function RegisterPage({ navigateTo }: RegisterPageProps) {
     );
   }
 
+// Retorna JSX para renderização do componente.
   return (
     <div className="min-h-screen bg-[#050505] flex text-white font-sans selection:bg-brand-green selection:text-black">
       <div className="noise-overlay" />

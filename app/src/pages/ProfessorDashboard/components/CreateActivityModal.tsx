@@ -1,4 +1,11 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState, useRef } from 'react';
+// Importa componentes de animação do Framer Motion.
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent, DialogHeader, DialogTitle } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -8,18 +15,27 @@ import { Textarea } from '@/components/ui/textarea';
 import { Badge } from '@/components/ui/badge';
 import { Plus, Paperclip, Check, X } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
+// Importa tipo(s) User, Attachment para tipagem do TypeScript.
 import type { User, Attachment } from '@/types';
 
 export function CreateActivityModal({ isOpen, onClose, aluno, curso }: { isOpen: boolean; onClose: () => void; aluno: User | null; curso: string | null }) {
+// Declara estado titulo e setter setTitulo.
   const [titulo, setTitulo] = useState('');
+// Declara estado descricao e setter setDescricao.
   const [descricao, setDescricao] = useState('');
+// Declara estado anexos e setter setAnexos.
   const [anexos, setAnexos] = useState<Attachment[]>([]);
+// Declara estado linkInput e setter setLinkInput.
   const [linkInput, setLinkInput] = useState('');
+// Declara estado isSubmitting e setter setIsSubmitting.
   const [isSubmitting, setIsSubmitting] = useState(false);
+// Declara estado success e setter setSuccess.
   const [success, setSuccess] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+// Extrai valores e funções do hook AuthStore.
   const { criarAtividade, currentUser } = useAuthStore();
 
+// Declara função handleFileChange que processa dados ou eventos.
   const handleFileChange = (e: React.ChangeEvent<HTMLInputElement>) => {
     const files = Array.from(e.target.files || []);
     setAnexos(prev => [...prev, ...files.map(f => ({
@@ -31,6 +47,7 @@ export function CreateActivityModal({ isOpen, onClose, aluno, curso }: { isOpen:
     if (fileInputRef.current) fileInputRef.current.value = '';
   };
 
+// Declara função handleAddLink que processa dados ou eventos.
   const handleAddLink = () => {
     if (!linkInput.trim()) return;
     setAnexos(prev => [...prev, { id: `link-${Date.now()}`, nome: linkInput, tipo: 'link', url: linkInput }]);
@@ -47,6 +64,7 @@ export function CreateActivityModal({ isOpen, onClose, aluno, curso }: { isOpen:
     setTimeout(() => { setSuccess(false); setTitulo(''); setDescricao(''); setAnexos([]); onClose(); }, 1500);
   };
 
+// Retorna JSX para renderização do componente.
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-2xl bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-0 overflow-hidden flex flex-col max-h-[90vh] cursor-default">

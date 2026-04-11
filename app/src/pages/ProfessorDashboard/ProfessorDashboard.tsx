@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa componentes de animação do Framer Motion.
 import { motion, AnimatePresence } from 'framer-motion';
 import { GraduationCap, Bell, LogOut, Users, Plus, FileText, MessageSquare, AlertCircle, CheckCircle, BookOpen, Clock, ChevronDown, ChevronRight, Search, UserCircle } from 'lucide-react';
 import { Button } from '@/components/ui/button';
@@ -13,10 +19,12 @@ import { CreateActivityModal } from './components/CreateActivityModal';
 import { ActivityDetailModal } from './components/ActivityDetailModal';
 import { ChatModal } from './components/ChatModal';
 import { useProfessorDashboard } from './useProfessorDashboard';
+// Importa tipo(s) User para tipagem do TypeScript.
 import type { User } from '@/types';
 
 interface ProfessorDashboardProps { onLogout: () => void; }
 
+// Componente React ProfessorDashboard que renderiza o conteúdo desta página.
 export default function ProfessorDashboard({ onLogout }: ProfessorDashboardProps) {
   const {
     activeTab, setActiveTab,
@@ -37,6 +45,7 @@ export default function ProfessorDashboard({ onLogout }: ProfessorDashboardProps
     handleActivityClick, handleCorrigir, handleChatClick,
   } = useProfessorDashboard();
 
+// Retorna JSX para renderização do componente.
   return (
     <div className="min-h-screen bg-[#050505] text-white selection:bg-brand-neon selection:text-black font-sans relative overflow-hidden cursor-default">
       <style>{`
@@ -241,6 +250,7 @@ export default function ProfessorDashboard({ onLogout }: ProfessorDashboardProps
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
                     {(atividadesDosCurso as any[]).map((atividade: any) => {
                       const aluno = getAlunoById(atividade.alunoId);
+// Retorna JSX para renderização do componente.
                       return (
                         <motion.div key={atividade.id} whileHover={{ y: -5 }} onClick={() => handleActivityClick(atividade)} className="glass-panel rounded-3xl p-8 border border-white/10 hover:border-brand-green/30 transition-all cursor-pointer group">
                           <div className="flex items-start justify-between mb-6">

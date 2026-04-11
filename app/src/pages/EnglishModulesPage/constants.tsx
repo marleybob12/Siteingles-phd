@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import { Clock, Star, Zap, Shield, Globe } from 'lucide-react';
 
 export const MODULES = [

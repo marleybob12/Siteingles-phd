@@ -1,13 +1,22 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState } from 'react';
+// Importa componentes de animação do Framer Motion.
 import { motion } from 'framer-motion';
 import { Button } from '@/components/ui/button';
 import { Key, Copy, CheckCircle2 } from 'lucide-react';
 
 export function ProfessorCodeCard({ codigo }: { codigo?: string }) {
+// Declara estado copied e setter setCopied.
   const [copied, setCopied] = useState(false);
   const handleCopy = async () => {
     if (codigo) { await navigator.clipboard.writeText(codigo); setCopied(true); setTimeout(() => setCopied(false), 2000); }
   };
+// Retorna JSX para renderização do componente.
   return (
     <motion.div initial={{ opacity: 0, y: 20 }} animate={{ opacity: 1, y: 0 }} className="mt-16">
       <div className="glass-panel rounded-[2.5rem] p-10 border border-brand-green/20 relative overflow-hidden group">

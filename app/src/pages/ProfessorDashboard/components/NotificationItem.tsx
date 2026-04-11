@@ -1,7 +1,13 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import { Button } from '@/components/ui/button';
 import { Check, X } from 'lucide-react';
 
 export function NotificationItem({ notification, onAprovar, onRejeitar }: any) {
+// Retorna JSX para renderização do componente.
   return (
     <div className="p-6 hover:bg-white/5 transition-colors">
       <div className="flex items-start gap-5">

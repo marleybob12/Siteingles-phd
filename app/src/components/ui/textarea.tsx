@@ -1,8 +1,15 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 import * as React from "react"
 
 import { cn } from "@/lib/utils"
 
+// Função Textarea responsável por lógica reutilizável.
 function Textarea({ className, ...props }: React.ComponentProps<"textarea">) {
+// Retorna JSX para renderização do componente.
   return (
     <textarea
       data-slot="textarea"

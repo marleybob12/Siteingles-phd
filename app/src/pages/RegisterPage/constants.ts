@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 export const MODULOS_INGLES = [
   { id: 'ingles-1', label: '1 aula semanal',    desc: 'Ritmo leve, ideal para quem tem pouco tempo disponível' },
   { id: 'ingles-2', label: '2 aulas semanais',  desc: 'Progressão constante com mais tempo de prática' },

@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 export const GLOBAL_STYLES = `
   :root {
     --primary: #10b981;

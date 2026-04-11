@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -5,10 +10,12 @@ import * as LabelPrimitive from "@radix-ui/react-label"
 
 import { cn } from "@/lib/utils"
 
+// Função Label responsável por lógica reutilizável.
 function Label({
   className,
   ...props
 }: React.ComponentProps<typeof LabelPrimitive.Root>) {
+// Retorna JSX para renderização do componente.
   return (
     <LabelPrimitive.Root
       data-slot="label"

@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState, useRef, useEffect } from 'react';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -7,20 +13,25 @@ import { useAuthStore } from '@/store/authStore';
 import { Avatar } from '@/components/shared/Avatar';
 
 export function ChatModal({ isOpen, onClose, aluno }: any) {
+// Declara estado message e setter setMessage.
   const [message, setMessage] = useState('');
+// Extrai valores e funções do hook AuthStore.
   const { currentUser, getMensagensByAluno, enviarMensagem } = useAuthStore();
   const mensagens = aluno && currentUser ? getMensagensByAluno(aluno.id, currentUser.id) : [];
   const scrollRef = useRef<HTMLDivElement>(null);
 
+// Hook useEffect para efeitos colaterais após renderização.
   useEffect(() => {
     if (scrollRef.current) scrollRef.current.scrollTop = scrollRef.current.scrollHeight;
   }, [mensagens, isOpen]);
 
+// Declara função handleSubmit que processa dados ou eventos.
   const handleSubmit = (e: React.FormEvent) => {
     e.preventDefault();
     if (message.trim() && aluno && currentUser) { enviarMensagem(aluno.id, message); setMessage(''); }
   };
 
+// Retorna JSX para renderização do componente.
   return (
     <Dialog open={isOpen} onOpenChange={onClose}>
       <DialogContent className="max-w-xl h-[700px] bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-0 overflow-hidden flex flex-col cursor-default">

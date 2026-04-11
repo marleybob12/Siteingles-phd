@@ -1,3 +1,8 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
 "use client"
 
 import * as React from "react"
@@ -6,10 +11,12 @@ import { CircleIcon } from "lucide-react"
 
 import { cn } from "@/lib/utils"
 
+// Função RadioGroup responsável por lógica reutilizável.
 function RadioGroup({
   className,
   ...props
 }: React.ComponentProps<typeof RadioGroupPrimitive.Root>) {
+// Retorna JSX para renderização do componente.
   return (
     <RadioGroupPrimitive.Root
       data-slot="radio-group"
@@ -19,10 +26,12 @@ function RadioGroup({
   )
 }
 
+// Função RadioGroupItem responsável por lógica reutilizável.
 function RadioGroupItem({
   className,
   ...props
 }: React.ComponentProps<typeof RadioGroupPrimitive.Item>) {
+// Retorna JSX para renderização do componente.
   return (
     <RadioGroupPrimitive.Item
       data-slot="radio-group-item"

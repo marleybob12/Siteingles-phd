@@ -1,3 +1,9 @@
+/**
+ * Este arquivo contém componentes React e lógica de interface.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa tipo(s) Page para tipagem do TypeScript.
 import type { Page } from '@/App';
 import { GLOBAL_STYLES } from './styles';
 import { useHomePage } from './useHomePage';
@@ -12,6 +18,7 @@ interface HomePageProps {
   navigateTo: (page: Page) => void;
 }
 
+// Componente React HomePage que renderiza o conteúdo desta página.
 export default function HomePage({ navigateTo }: HomePageProps) {
   const {
     isScrolled, mobileMenuOpen, setMobileMenuOpen,
@@ -19,6 +26,7 @@ export default function HomePage({ navigateTo }: HomePageProps) {
     scrollTo, handleContactFormSubmit,
   } = useHomePage();
 
+// Retorna JSX para renderização do componente.
   return (
     <>
       <style>{GLOBAL_STYLES}</style>

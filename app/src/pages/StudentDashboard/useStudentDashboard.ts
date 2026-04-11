@@ -1,15 +1,28 @@
+/**
+ * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
+ * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
+ */
+
+// Importa hooks do React para estado e efeitos colaterais.
 import { useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
+// Importa tipo(s) Activity para tipagem do TypeScript.
 import type { Activity } from '@/types';
 
 export type TabValue = 'cursos' | 'atividades' | 'chat' | 'notificacoes';
 
 export function useStudentDashboard() {
+// Declara estado activeTab e setter setActiveTab.
   const [activeTab, setActiveTab] = useState<TabValue>('cursos');
+// Declara estado showNotifDropdown e setter setShowNotifDropdown.
   const [showNotifDropdown, setShowNotifDropdown] = useState(false);
+// Declara estado selectedActivity e setter setSelectedActivity.
   const [selectedActivity, setSelectedActivity] = useState<Activity | null>(null);
+// Declara estado showActivityModal e setter setShowActivityModal.
   const [showActivityModal, setShowActivityModal] = useState(false);
+// Declara estado showChatModal e setter setShowChatModal.
   const [showChatModal, setShowChatModal] = useState(false);
+// Declara estado expandedCurso e setter setExpandedCurso.
   const [expandedCurso, setExpandedCurso] = useState<string | null>(null);
 
   const store = useAuthStore() as any;
@@ -33,11 +46,13 @@ export function useStudentDashboard() {
   const pendentes = atividades.filter(a => a.correctionStatus === 'pendente').length;
   const emAnalise = atividades.filter(a => a.correctionStatus === 'em_analise').length;
 
+// Declara função handleActivityClick que processa dados ou eventos.
   const handleActivityClick = (activity: Activity) => {
     setSelectedActivity(activity);
     setShowActivityModal(true);
   };
 
+// Retorna objeto ou estado dentro da função.
   return {
     activeTab, setActiveTab,
     showNotifDropdown, setShowNotifDropdown,
