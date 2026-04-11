@@ -1,10 +1,4 @@
-/**
- * Este arquivo contém componentes React e lógica de interface.
- * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
- */
-
-import React, { useState, useEffect } from 'react';
-// Importa componentes de animação do Framer Motion.
+import React, { useState } from 'react';
 import { motion } from 'framer-motion';
 import { Dialog, DialogContent } from '@/components/ui/dialog';
 import { Button } from '@/components/ui/button';
@@ -12,23 +6,33 @@ import { Textarea } from '@/components/ui/textarea';
 import { FileText, Clock, Paperclip, CheckCircle, RotateCcw, Send } from 'lucide-react';
 import { useAuthStore } from '@/store/authStore';
 import { CorrectionStatusBadge } from '@/components/shared/CorrectionStatusBadge';
-// Importa tipo(s) Activity para tipagem do TypeScript.
-import type { Activity } from '@/types';
+import type { Activity, ActivityResponse, Attachment } from '@/types';
 
-export function ActivityModal({ isOpen, onClose, activity }: { isOpen: boolean; onClose: () => void; activity: Activity | null }) {
-// Declara estado resposta e setter setResposta.
+interface ActivityModalProps {
+  isOpen: boolean;
+  onClose: () => void;
+  activity: Activity | null;
+}
+
+export function ActivityModal({ isOpen, onClose, activity }: ActivityModalProps) {
   const [resposta, setResposta] = useState('');
-// Declara estado isSubmitting e setter setIsSubmitting.
   const [isSubmitting, setIsSubmitting] = useState(false);
-// Declara estado submitted e setter setSubmitted.
   const [submitted, setSubmitted] = useState(false);
-// Extrai valores e funções do hook AuthStore.
-  const { currentUser, responderAtividade } = useAuthStore() as any;
+  const currentUser = useAuthStore(state => state.currentUser);
+  const responderAtividade = useAuthStore(state => state.responderAtividade);
 
-// Hook useEffect para efeitos colaterais após renderização.
-  useEffect(() => {
-    if (!isOpen) { setResposta(''); setSubmitted(false); setIsSubmitting(false); }
-  }, [isOpen]);
+  const resetLocalState = () => {
+    setResposta('');
+    setSubmitted(false);
+    setIsSubmitting(false);
+  };
+
+  const handleOpenChange = (open: boolean) => {
+    if (!open) {
+      resetLocalState();
+      onClose();
+    }
+  };
 
   if (!activity) return null;
   const canSubmit = !activity.resposta && activity.correctionStatus !== 'correta';
@@ -36,16 +40,28 @@ export function ActivityModal({ isOpen, onClose, activity }: { isOpen: boolean; 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!resposta.trim() || !currentUser) return;
+
     setIsSubmitting(true);
     await new Promise(r => setTimeout(r, 800));
-    responderAtividade?.(activity.id, resposta);
-    setIsSubmitting(false); setSubmitted(true);
-    setTimeout(onClose, 1500);
+
+    const responsePayload: ActivityResponse = {
+      tipo: 'texto',
+      conteudo: resposta,
+      enviadoEm: new Date(),
+    };
+
+    responderAtividade(activity.id, responsePayload);
+    setIsSubmitting(false);
+    setSubmitted(true);
+
+    setTimeout(() => {
+      resetLocalState();
+      onClose();
+    }, 1500);
   };
 
-// Retorna JSX para renderização do componente.
   return (
-    <Dialog open={isOpen} onOpenChange={onClose}>
+    <Dialog open={isOpen} onOpenChange={handleOpenChange}>
       <DialogContent className="max-w-2xl bg-[#0a0a0a] border border-white/10 text-white rounded-[2.5rem] p-0 overflow-hidden flex flex-col max-h-[90vh] cursor-default">
         <div className="p-10 flex-1 overflow-y-auto custom-scrollbar">
           <div className="flex items-start justify-between gap-6 mb-8">
@@ -71,10 +87,10 @@ export function ActivityModal({ isOpen, onClose, activity }: { isOpen: boolean; 
               <section>
                 <h4 className="text-brand-green font-black uppercase tracking-[0.2em] text-[10px] mb-3">Materiais de Apoio</h4>
                 <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
-                  {activity.anexos.map((a: any) => (
-                    <a key={a.id} href={a.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-brand-neon/30 transition-all group cursor-pointer">
+                  {activity.anexos.map((anexo: Attachment) => (
+                    <a key={anexo.id} href={anexo.url} target="_blank" rel="noreferrer" className="flex items-center gap-4 p-4 bg-white/5 border border-white/5 rounded-2xl hover:border-brand-neon/30 transition-all group cursor-pointer">
                       <Paperclip className="w-5 h-5 text-gray-500 group-hover:text-brand-neon" />
-                      <p className="font-bold text-sm truncate group-hover:text-brand-neon transition-colors">{a.nome}</p>
+                      <p className="font-bold text-sm truncate group-hover:text-brand-neon transition-colors">{anexo.nome}</p>
                     </a>
                   ))}
                 </div>

@@ -6,7 +6,7 @@
 import { create } from 'zustand';
 import { persist } from 'zustand/middleware';
 // Importa tipo(s) User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation para tipagem do TypeScript.
-import type { User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation } from '@/types';
+import type { User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation, ActivityResponse } from '@/types';
 
 interface AuthState {
   // User state
@@ -31,7 +31,7 @@ interface AuthState {
   corrigirAtividade: (atividadeId: string, status: ActivityCorrectionStatus, feedback?: string) => void;
   
   // Aluno actions
-  responderAtividade: (atividadeId: string, resposta: any) => void;
+  responderAtividade: (atividadeId: string, resposta: ActivityResponse) => void;
   enviarMensagem: (receiverId: string, mensagem: string) => void;
   
   // Notification actions
@@ -101,8 +101,9 @@ export const useAuthStore = create<AuthState>()(
       activities: [],
       messages: [],
 
-      login: (email, _senha) => {
+      login: (email, senha) => {
         const { users } = get();
+        void senha;
         const user = users.find(u => u.email === email);
         
         if (!user) {
@@ -458,7 +459,7 @@ export const useAuthStore = create<AuthState>()(
       onRehydrateStorage: () => (state) => {
       if (!state) return;
 // Declara função toDate que processa dados ou eventos.
-      const toDate = (v: any) => v ? new Date(v) : v;
+      const toDate = (v: unknown): Date => (v instanceof Date ? v : new Date(v as string | number));
       state.notifications = state.notifications.map(n => ({ ...n, createdAt: toDate(n.createdAt) }));
       state.activities = state.activities.map(a => ({ ...a, createdAt: toDate(a.createdAt) }));
       state.messages = state.messages.map(m => ({ ...m, createdAt: toDate(m.createdAt) }));
