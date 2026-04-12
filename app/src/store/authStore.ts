@@ -1,47 +1,60 @@
-/**
- * Este arquivo contém utilitários e definições de tipos ou lógica TypeScript para a aplicação.
- * Comentários foram adicionados automaticamente para explicar as importações e declarações principais.
- */
-
 import { create } from 'zustand';
-import { persist } from 'zustand/middleware';
-// Importa tipo(s) User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation para tipagem do TypeScript.
-import type { User, UserRole, Notification, Activity, ChatMessage, UserStatus, ActivityCorrectionStatus, ChatConversation, ActivityResponse } from '@/types';
+import type {
+  User,
+  UserRole,
+  Notification,
+  Activity,
+  ChatMessage,
+  UserStatus,
+  ActivityCorrectionStatus,
+  ChatConversation,
+  Attachment,
+  ActivityResponse,
+} from '@/types';
+import { supabase } from '@/lib/supabase';
 
 interface AuthState {
-  // User state
   currentUser: User | null;
   isAuthenticated: boolean;
-  
-  // Data stores
+
   users: User[];
   notifications: Notification[];
   activities: Activity[];
   messages: ChatMessage[];
-  
-  // Actions
-  login: (email: string, senha: string) => { success: boolean; message?: string };
-  register: (userData: Partial<User> & { email: string; senha: string; documento: string; role: UserRole; codigoProfessor?: string; cursoAdquirido?: 'ingles' | 'enem'; moduloAdquirido?: string }) => { success: boolean; message?: string };
-  logout: () => void;
-  
-  // Professor actions
-  aprovarAluno: (alunoId: string) => void;
-  rejeitarAluno: (alunoId: string) => void;
-  criarAtividade: (atividade: Omit<Activity, 'id' | 'createdAt' | 'status' | 'correctionStatus'>) => void;
-  corrigirAtividade: (atividadeId: string, status: ActivityCorrectionStatus, feedback?: string) => void;
-  
-  // Aluno actions
-  responderAtividade: (atividadeId: string, resposta: ActivityResponse) => void;
-  enviarMensagem: (receiverId: string, mensagem: string) => void;
-  
-  // Notification actions
-  markNotificationAsRead: (notificationId: string) => void;
-  markNotificationAsResolved: (notificationId: string, resolution: 'aprovado' | 'rejeitado') => void;
+
+  initializeAuth: () => Promise<void>;
+  login: (email: string, senha: string) => Promise<{ success: boolean; message?: string }>;
+  register: (userData: {
+    email: string;
+    senha: string;
+    documento: string;
+    role: UserRole;
+    codigoProfessor?: string;
+    cursoAdquirido?: 'ingles' | 'enem';
+    moduloAdquirido?: string;
+  }) => Promise<{ success: boolean; message?: string }>;
+  logout: () => Promise<void>;
+
+  aprovarAluno: (alunoId: string) => Promise<void>;
+  rejeitarAluno: (alunoId: string) => Promise<void>;
+  criarAtividade: (atividade: Omit<Activity, 'id' | 'createdAt' | 'status' | 'correctionStatus' | 'resposta'>) => Promise<void>;
+  corrigirAtividade: (atividadeId: string, status: ActivityCorrectionStatus, feedback?: string) => Promise<void>;
+
+  responderAtividade: (atividadeId: string, resposta: ActivityResponse) => Promise<void>;
+  enviarMensagem: (receiverId: string, mensagem: string) => Promise<void>;
+
+  markNotificationAsRead: (notificationId: string) => Promise<void>;
+  markNotificationAsResolved: (notificationId: string, resolution: 'aprovado' | 'rejeitado') => Promise<void>;
+
+  refreshUsers: () => Promise<void>;
+  refreshNotifications: () => Promise<void>;
+  refreshActivities: () => Promise<void>;
+  refreshMessages: () => Promise<void>;
+
   getUnreadNotifications: (userId: string) => Notification[];
   getPendingNotifications: (userId: string) => Notification[];
   getResolvedNotifications: (userId: string) => Notification[];
-  
-  // Getters
+
   getAlunosByProfessor: (professorId: string) => User[];
   getAtividadesByAluno: (alunoId: string) => Activity[];
   getAtividadesByProfessor: (professorId: string) => Activity[];
@@ -50,421 +63,559 @@ interface AuthState {
   getProfessorByCodigo: (codigo: string) => User | undefined;
   getProfessorCode: (professorId: string) => string | undefined;
   getAlunoById: (alunoId: string) => User | undefined;
+  getProfessorByAluno: (alunoId: string) => User | undefined;
 }
 
-// Generate unique code for professor - formato: PROF-XXXXXX
-const generateProfessorCode = (): string => {
-  const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
-  let code = 'PROF-';
-  for (let i = 0; i < 6; i++) {
-    code += chars.charAt(Math.floor(Math.random() * chars.length));
-  }
-// Retorna o valor calculado pela função.
-  return code;
-};
+const toUser = (row: any): User => ({
+  id: row.id,
+  email: row.email,
+  documento: row.documento,
+  role: row.role,
+  nome: row.nome,
+  codigo: row.codigo ?? undefined,
+  codigoProfessor: row.codigo_professor ?? undefined,
+  status: row.status,
+  professorId: row.professor_id ?? undefined,
+  cursoAdquirido: row.curso_adquirido ?? undefined,
+  moduloAdquirido: row.modulo_adquirido ?? undefined,
+  dataCadastro: new Date(row.data_cadastro),
+});
 
-// Check if code already exists
-const isCodeUnique = (code: string, users: User[]): boolean => {
-// Retorna o valor calculado pela função.
-  return !users.some(u => u.role === 'professor' && u.codigo === code);
-};
+const toNotification = (row: any): Notification => ({
+  id: row.id,
+  userId: row.user_id,
+  title: row.title,
+  message: row.message,
+  type: row.type,
+  read: row.read,
+  resolved: row.resolved,
+  resolution: row.resolution ?? undefined,
+  createdAt: new Date(row.created_at),
+  data: row.data ?? undefined,
+});
 
-// Generate unique code
-const generateUniqueCode = (users: User[]): string => {
-  let code = generateProfessorCode();
-  while (!isCodeUnique(code, users)) {
-    code = generateProfessorCode();
-  }
-// Retorna o valor calculado pela função.
-  return code;
-};
+const toAttachment = (row: any): Attachment => ({
+  id: row.id,
+  nome: row.nome,
+  tipo: row.tipo,
+  url: row.url,
+});
 
-// Mock initial data - Professor com código pré-gerado
-const mockProfessor: User = {
-  id: 'prof-1',
-  email: 'professor@eduplatform.com',
-  documento: '123.456.789-00',
-  role: 'professor',
-  nome: 'Prof. Ana Silva',
-  codigo: 'PROF-A1B2C3',
-  status: 'aprovado',
-  dataCadastro: new Date(),
-};
+const toMessage = (row: any): ChatMessage => ({
+  id: row.id,
+  senderId: row.sender_id,
+  receiverId: row.receiver_id,
+  message: row.message,
+  createdAt: new Date(row.created_at),
+  read: row.read,
+});
 
-export const useAuthStore = create<AuthState>()(
-  persist(
-    (set, get) => ({
+export const useAuthStore = create<AuthState>((set, get) => ({
+  currentUser: null,
+  isAuthenticated: false,
+  users: [],
+  notifications: [],
+  activities: [],
+  messages: [],
+
+  initializeAuth: async () => {
+    const { data: sessionData } = await supabase.auth.getSession();
+    const session = sessionData.session;
+
+    if (!session?.user) {
+      set({ currentUser: null, isAuthenticated: false });
+      return;
+    }
+
+    const { data: userRow, error } = await supabase
+      .from('users')
+      .select('*')
+      .eq('id', session.user.id)
+      .single();
+
+    if (error || !userRow) {
+      set({ currentUser: null, isAuthenticated: false });
+      return;
+    }
+
+    set({
+      currentUser: toUser(userRow),
+      isAuthenticated: true,
+    });
+
+    await Promise.all([
+      get().refreshUsers(),
+      get().refreshNotifications(),
+      get().refreshActivities(),
+      get().refreshMessages(),
+    ]);
+  },
+
+  login: async (email, senha) => {
+    const { error } = await supabase.auth.signInWithPassword({
+      email,
+      password: senha,
+    });
+
+    if (error) {
+      return { success: false, message: error.message };
+    }
+
+    await get().initializeAuth();
+    return { success: true };
+  },
+
+  register: async (userData) => {
+    const role = userData.role;
+    if (!role) return { success: false, message: 'Perfil inválido' };
+
+    const codigoProfessorNormalizado = userData.codigoProfessor?.trim().toUpperCase();
+    let professor: any = null;
+
+    if (role === 'aluno') {
+      if (!codigoProfessorNormalizado) {
+        return { success: false, message: 'Código do professor inválido' };
+      }
+
+      const { data: profRow } = await supabase
+        .from('users')
+        .select('*')
+        .eq('role', 'professor')
+        .eq('codigo', codigoProfessorNormalizado)
+        .single();
+
+      if (!profRow) {
+        return { success: false, message: 'Código do professor inválido' };
+      }
+
+      professor = profRow;
+    }
+
+    let professorCode: string | undefined;
+
+    if (role === 'professor') {
+      const { data: generatedCode, error: codeError } = await supabase.rpc('generate_professor_code');
+      if (codeError || !generatedCode) {
+        return { success: false, message: 'Erro ao gerar código do professor' };
+      }
+      professorCode = generatedCode;
+    }
+
+    const { data: signUpData, error: signUpError } = await supabase.auth.signUp({
+      email: userData.email,
+      password: userData.senha,
+      options: {
+        data: {
+          nome: userData.email.split('@')[0],
+          documento: userData.documento,
+          role,
+          codigo: professorCode,
+          codigoProfessor: codigoProfessorNormalizado,
+          status: role === 'professor' ? 'aprovado' : 'pendente',
+          cursoAdquirido: role === 'aluno' ? userData.cursoAdquirido : undefined,
+          moduloAdquirido: role === 'aluno' ? userData.moduloAdquirido : undefined,
+        },
+      },
+    });
+
+    if (signUpError) {
+      return { success: false, message: signUpError.message };
+    }
+
+    let authUserId = signUpData.user?.id ?? signUpData.session?.user?.id;
+
+    if (!authUserId) {
+      const { data: authSession } = await supabase.auth.getSession();
+      authUserId = authSession.session?.user?.id;
+    }
+
+    if (role === 'aluno' && professor && authUserId) {
+      await supabase
+        .from('users')
+        .update({
+          professor_id: professor.id,
+          codigo_professor: codigoProfessorNormalizado,
+        })
+        .eq('id', authUserId);
+
+      await supabase.from('notifications').insert({
+        user_id: professor.id,
+        title: 'Novo aluno aguardando aprovação',
+        message: `${userData.email.split('@')[0]} solicitou acesso à plataforma${userData.cursoAdquirido ? ` para o curso de ${userData.cursoAdquirido === 'ingles' ? 'Inglês' : 'ENEM'}` : ''}.`,
+        type: 'autorizacao',
+        read: false,
+        resolved: false,
+        data: {
+          alunoEmail: userData.email,
+          curso: userData.cursoAdquirido,
+        },
+      });
+    }
+
+    await get().initializeAuth();
+    return { success: true };
+  },
+
+  logout: async () => {
+    await supabase.auth.signOut();
+    set({
       currentUser: null,
       isAuthenticated: false,
-      users: [mockProfessor],
+      users: [],
       notifications: [],
       activities: [],
       messages: [],
+    });
+  },
 
-      login: (email, senha) => {
-        const { users } = get();
-        void senha;
-        const user = users.find(u => u.email === email);
-        
-        if (!user) {
-// Retorna objeto ou estado dentro da função.
-          return { success: false, message: 'Usuário não encontrado' };
-        }
-        
-        set({ currentUser: user, isAuthenticated: true });
-// Retorna objeto ou estado dentro da função.
-        return { success: true };
-      },
+  refreshUsers: async () => {
+    const { currentUser } = get();
+    if (!currentUser) return;
 
-      register: (userData) => {
-        const { users } = get();
-        
-        if (users.some(u => u.email === userData.email)) {
-// Retorna objeto ou estado dentro da função.
-          return { success: false, message: 'Email já cadastrado' };
-        }
+    let query = supabase.from('users').select('*');
 
-        // If student, validate professor code
-        if (userData.role === 'aluno' && userData.codigoProfessor) {
-          const professor = users.find(u => u.role === 'professor' && u.codigo === userData.codigoProfessor);
-          
-          if (!professor) {
-// Retorna objeto ou estado dentro da função.
-            return { success: false, message: 'Código do professor inválido' };
+    if (currentUser.role === 'professor') {
+      query = query.or(`id.eq.${currentUser.id},professor_id.eq.${currentUser.id}`);
+    } else {
+      query = query.or(`id.eq.${currentUser.id},id.eq.${currentUser.professorId ?? '00000000-0000-0000-0000-000000000000'}`);
+    }
+
+    const { data } = await query;
+    set({ users: (data ?? []).map(toUser) });
+  },
+
+  refreshNotifications: async () => {
+    const { currentUser } = get();
+    if (!currentUser) return;
+
+    const { data } = await supabase
+      .from('notifications')
+      .select('*')
+      .eq('user_id', currentUser.id)
+      .order('created_at', { ascending: false });
+
+    set({ notifications: (data ?? []).map(toNotification) });
+  },
+
+  refreshActivities: async () => {
+    const { currentUser } = get();
+    if (!currentUser) return;
+
+    const { data: activityRows } = await supabase
+      .from('activities')
+      .select(`
+        *,
+        activity_attachments (*),
+        activity_responses (
+          *,
+          activity_attachments:arquivo_attachment_id (*)
+        )
+      `)
+      .or(
+        currentUser.role === 'professor'
+          ? `professor_id.eq.${currentUser.id}`
+          : `aluno_id.eq.${currentUser.id}`
+      )
+      .order('created_at', { ascending: false });
+
+    const mapped: Activity[] = (activityRows ?? []).map((row: any) => ({
+      id: row.id,
+      professorId: row.professor_id,
+      alunoId: row.aluno_id,
+      curso: row.curso,
+      titulo: row.titulo,
+      descricao: row.descricao,
+      anexos: (row.activity_attachments ?? []).map(toAttachment),
+      status: row.status,
+      correctionStatus: row.correction_status,
+      correctionFeedback: row.correction_feedback ?? undefined,
+      createdAt: new Date(row.created_at),
+      resposta: row.activity_responses
+        ? {
+            tipo: row.activity_responses.tipo,
+            conteudo: row.activity_responses.conteudo,
+            arquivo: row.activity_responses.activity_attachments
+              ? toAttachment(row.activity_responses.activity_attachments)
+              : undefined,
+            enviadoEm: new Date(row.activity_responses.enviado_em),
           }
+        : undefined,
+    }));
 
-          const newUser: User = {
-            id: `user-${Date.now()}`,
-            email: userData.email,
-            documento: userData.documento,
-            role: userData.role,
-            nome: userData.email.split('@')[0],
-            codigoProfessor: userData.codigoProfessor,
-            status: 'pendente',
-            professorId: professor.id,
-            cursoAdquirido: userData.cursoAdquirido,
-            moduloAdquirido: userData.moduloAdquirido,
-            dataCadastro: new Date(),
-          };
+    set({ activities: mapped });
+  },
 
-          set({ users: [...users, newUser] });
+  refreshMessages: async () => {
+    const { currentUser } = get();
+    if (!currentUser) return;
 
-          // Create notification for professor
-          const notification: Notification = {
-            id: `notif-${Date.now()}`,
-            userId: professor.id,
-            title: 'Novo aluno aguardando aprovação',
-            message: `${newUser.nome} solicitou acesso à plataforma${userData.cursoAdquirido ? ` para o curso de ${userData.cursoAdquirido === 'ingles' ? 'Inglês' : 'ENEM'}` : ''}.`,
-            type: 'autorizacao',
-            read: false,
-            resolved: false,
-            createdAt: new Date(),
-            data: { alunoId: newUser.id, curso: userData.cursoAdquirido },
-          };
-          set(state => ({ notifications: [...state.notifications, notification] }));
+    const { data } = await supabase
+      .from('messages')
+      .select('*')
+      .or(`sender_id.eq.${currentUser.id},receiver_id.eq.${currentUser.id}`)
+      .order('created_at', { ascending: true });
 
-          set({ currentUser: newUser, isAuthenticated: true });
-// Retorna objeto ou estado dentro da função.
-          return { success: true };
-        }
+    set({ messages: (data ?? []).map(toMessage) });
+  },
 
-        // Create professor with generated code
-        if (userData.role === 'professor') {
-          const uniqueCode = generateUniqueCode(users);
-          
-          const newUser: User = {
-            id: `prof-${Date.now()}`,
-            email: userData.email,
-            documento: userData.documento,
-            role: userData.role,
-            nome: userData.email.split('@')[0],
-            codigo: uniqueCode,
-            status: 'aprovado',
-            dataCadastro: new Date(),
-          };
+  aprovarAluno: async (alunoId) => {
+    await supabase
+      .from('users')
+      .update({ status: 'aprovado' as UserStatus })
+      .eq('id', alunoId);
 
-          set({ users: [...users, newUser] });
-          set({ currentUser: newUser, isAuthenticated: true });
-// Retorna objeto ou estado dentro da função.
-          return { success: true };
-        }
+    await supabase.from('notifications').insert({
+      user_id: alunoId,
+      title: 'Aprovação concedida!',
+      message: 'Você foi aprovado e agora tem acesso completo à plataforma.',
+      type: 'sistema',
+      read: false,
+      resolved: false,
+    });
 
-// Retorna objeto ou estado dentro da função.
-        return { success: false, message: 'Perfil inválido' };
-      },
+    await Promise.all([get().refreshUsers(), get().refreshNotifications()]);
+  },
 
-      logout: () => {
-        set({ currentUser: null, isAuthenticated: false });
-      },
+  rejeitarAluno: async (alunoId) => {
+    await supabase
+      .from('users')
+      .update({ status: 'rejeitado' as UserStatus })
+      .eq('id', alunoId);
 
-      aprovarAluno: (alunoId) => {
-        const { users } = get();
-        const updatedUsers = users.map(u => 
-          u.id === alunoId ? { ...u, status: 'aprovado' as UserStatus } : u
-        );
-        set({ users: updatedUsers });
+    await supabase.from('notifications').insert({
+      user_id: alunoId,
+      title: 'Solicitação rejeitada',
+      message: 'Infelizmente sua solicitação foi rejeitada. Entre em contato com o suporte.',
+      type: 'sistema',
+      read: false,
+      resolved: false,
+    });
 
-        // Create notification for student
-        const notification: Notification = {
-          id: `notif-${Date.now()}`,
-          userId: alunoId,
-          title: 'Aprovação concedida!',
-          message: 'Você foi aprovado e agora tem acesso completo à plataforma.',
-          type: 'sistema',
-          read: false,
-          resolved: false,
-          createdAt: new Date(),
-        };
-        set(state => ({ notifications: [...state.notifications, notification] }));
-      },
+    await Promise.all([get().refreshUsers(), get().refreshNotifications()]);
+  },
 
-      rejeitarAluno: (alunoId) => {
-        const { users } = get();
-        const updatedUsers = users.map(u => 
-          u.id === alunoId ? { ...u, status: 'rejeitado' as UserStatus } : u
-        );
-        set({ users: updatedUsers });
+  criarAtividade: async (atividade) => {
+    const { data: insertedActivity } = await supabase
+      .from('activities')
+      .insert({
+        professor_id: atividade.professorId,
+        aluno_id: atividade.alunoId,
+        curso: atividade.curso,
+        titulo: atividade.titulo,
+        descricao: atividade.descricao,
+        status: 'pendente',
+        correction_status: 'pendente',
+      })
+      .select('*')
+      .single();
 
-        // Create notification for student
-        const notification: Notification = {
-          id: `notif-${Date.now()}`,
-          userId: alunoId,
-          title: 'Solicitação rejeitada',
-          message: 'Infelizmente sua solicitação foi rejeitada. Entre em contato com o suporte.',
-          type: 'sistema',
-          read: false,
-          resolved: false,
-          createdAt: new Date(),
-        };
-        set(state => ({ notifications: [...state.notifications, notification] }));
-      },
+    if (!insertedActivity) return;
 
-      criarAtividade: (atividade) => {
-        const newActivity: Activity = {
-          ...atividade,
-          id: `act-${Date.now()}`,
-          createdAt: new Date(),
-          status: 'pendente',
-          correctionStatus: 'pendente',
-        };
-        set(state => ({ activities: [...state.activities, newActivity] }));
+    if (atividade.anexos?.length) {
+      await supabase.from('activity_attachments').insert(
+        atividade.anexos.map((anexo) => ({
+          activity_id: insertedActivity.id,
+          nome: anexo.nome,
+          tipo: anexo.tipo,
+          url: anexo.url,
+        }))
+      );
+    }
 
-        // Create notification for student
-        const notification: Notification = {
-          id: `notif-${Date.now()}`,
-          userId: atividade.alunoId,
-          title: 'Nova atividade atribuída',
-          message: `Você recebeu uma nova atividade: ${atividade.titulo}`,
-          type: 'atividade',
-          read: false,
-          resolved: false,
-          createdAt: new Date(),
-          data: { atividadeId: newActivity.id },
-        };
-        set(state => ({ notifications: [...state.notifications, notification] }));
-      },
+    await supabase.from('notifications').insert({
+      user_id: atividade.alunoId,
+      title: 'Nova atividade atribuída',
+      message: `Você recebeu uma nova atividade: ${atividade.titulo}`,
+      type: 'atividade',
+      read: false,
+      resolved: false,
+      data: { atividadeId: insertedActivity.id },
+    });
 
-      corrigirAtividade: (atividadeId, status, feedback) => {
-        const { activities } = get();
-        const updatedActivities = activities.map(a => 
-          a.id === atividadeId 
-            ? { ...a, correctionStatus: status, correctionFeedback: feedback } 
-            : a
-        );
-        set({ activities: updatedActivities });
+    await Promise.all([get().refreshActivities(), get().refreshNotifications()]);
+  },
 
-        // Create notification for student
-        const atividade = activities.find(a => a.id === atividadeId);
-        if (atividade) {
-          const statusText = status === 'correta' ? 'correta' : status === 'incorreta' ? 'incorreta' : 'devolvida para correção';
-          const notification: Notification = {
-            id: `notif-${Date.now()}`,
-            userId: atividade.alunoId,
-            title: 'Atividade corrigida',
-            message: `Sua atividade "${atividade.titulo}" foi ${statusText}.${feedback ? ` Feedback: ${feedback}` : ''}`,
-            type: 'correcao',
-            read: false,
-            resolved: false,
-            createdAt: new Date(),
-            data: { atividadeId, status, feedback },
-          };
-          set(state => ({ notifications: [...state.notifications, notification] }));
-        }
-      },
+  corrigirAtividade: async (atividadeId, status, feedback) => {
+    const activity = get().activities.find((a) => a.id === atividadeId);
+    if (!activity) return;
 
-      responderAtividade: (atividadeId, resposta) => {
-        const { activities } = get();
-        const updatedActivities = activities.map(a => 
-          a.id === atividadeId 
-            ? { ...a, resposta, status: 'concluida' as const, correctionStatus: 'em_analise' as ActivityCorrectionStatus } 
-            : a
-        );
-        set({ activities: updatedActivities });
+    await supabase
+      .from('activities')
+      .update({
+        correction_status: status,
+        correction_feedback: feedback ?? null,
+      })
+      .eq('id', atividadeId);
 
-        // Notify professor
-        const atividade = activities.find(a => a.id === atividadeId);
-        if (atividade) {
-          const notification: Notification = {
-            id: `notif-${Date.now()}`,
-            userId: atividade.professorId,
-            title: 'Atividade respondida',
-            message: `O aluno enviou uma resposta para a atividade "${atividade.titulo}".`,
-            type: 'atividade',
-            read: false,
-            resolved: false,
-            createdAt: new Date(),
-            data: { atividadeId, alunoId: atividade.alunoId },
-          };
-          set(state => ({ notifications: [...state.notifications, notification] }));
-        }
-      },
+    const statusText =
+      status === 'correta'
+        ? 'correta'
+        : status === 'incorreta'
+          ? 'incorreta'
+          : 'devolvida para correção';
 
-      enviarMensagem: (receiverId, mensagem) => {
-        const { currentUser } = get();
-        if (!currentUser) return;
+    await supabase.from('notifications').insert({
+      user_id: activity.alunoId,
+      title: 'Atividade corrigida',
+      message: `Sua atividade "${activity.titulo}" foi ${statusText}.${feedback ? ` Feedback: ${feedback}` : ''}`,
+      type: 'correcao',
+      read: false,
+      resolved: false,
+      data: { atividadeId, status, feedback },
+    });
 
-        const newMessage: ChatMessage = {
-          id: `msg-${Date.now()}`,
-          senderId: currentUser.id,
-          receiverId: receiverId,
-          message: mensagem,
-          createdAt: new Date(),
-          read: false,
-        };
-        set(state => ({ messages: [...state.messages, newMessage] }));
+    await Promise.all([get().refreshActivities(), get().refreshNotifications()]);
+  },
 
-        // Create notification for receiver
-        const notification: Notification = {
-          id: `notif-${Date.now()}`,
-          userId: receiverId,
-          title: 'Nova mensagem',
-          message: `${currentUser.nome} enviou uma mensagem.`,
-          type: 'mensagem',
-          read: false,
-          resolved: false,
-          createdAt: new Date(),
-        };
-        set(state => ({ notifications: [...state.notifications, notification] }));
-      },
+  responderAtividade: async (atividadeId, resposta) => {
+    const activity = get().activities.find((a) => a.id === atividadeId);
+    if (!activity) return;
 
-      markNotificationAsRead: (notificationId) => {
-        const { notifications } = get();
-        const updatedNotifications = notifications.map(n => 
-          n.id === notificationId ? { ...n, read: true } : n
-        );
-        set({ notifications: updatedNotifications });
-      },
+    await supabase.from('activity_responses').upsert({
+      activity_id: atividadeId,
+      tipo: resposta.tipo,
+      conteudo: resposta.conteudo,
+      enviado_em: resposta.enviadoEm.toISOString(),
+    });
 
-      markNotificationAsResolved: (notificationId, resolution) => {
-        const { notifications } = get();
-        const updatedNotifications = notifications.map(n => 
-          n.id === notificationId ? { ...n, resolved: true, resolution } : n
-        );
-        set({ notifications: updatedNotifications });
-      },
+    await supabase
+      .from('activities')
+      .update({
+        status: 'concluida',
+        correction_status: 'em_analise',
+      })
+      .eq('id', atividadeId);
 
-      getUnreadNotifications: (userId) => {
-        const { notifications } = get();
-// Retorna o valor calculado pela função.
-        return notifications.filter(n => n.userId === userId && !n.read);
-      },
+    await supabase.from('notifications').insert({
+      user_id: activity.professorId,
+      title: 'Atividade respondida',
+      message: `O aluno enviou uma resposta para a atividade "${activity.titulo}".`,
+      type: 'atividade',
+      read: false,
+      resolved: false,
+      data: { atividadeId, alunoId: activity.alunoId },
+    });
 
-      getPendingNotifications: (userId) => {
-        const { notifications } = get();
-// Retorna o valor calculado pela função.
-        return notifications.filter(n => n.userId === userId && !n.resolved).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      },
+    await Promise.all([get().refreshActivities(), get().refreshNotifications()]);
+  },
 
-      getResolvedNotifications: (userId) => {
-        const { notifications } = get();
-// Retorna o valor calculado pela função.
-        return notifications.filter(n => n.userId === userId && n.resolved).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
-      },
+  enviarMensagem: async (receiverId, mensagem) => {
+    const { currentUser } = get();
+    if (!currentUser) return;
 
-      getAlunosByProfessor: (professorId) => {
-        const { users } = get();
-// Retorna o valor calculado pela função.
-        return users.filter(u => 
-          u.role === 'aluno' && u.professorId === professorId && u.status === 'aprovado'
-        );
-      },
+    await supabase.from('messages').insert({
+      sender_id: currentUser.id,
+      receiver_id: receiverId,
+      message: mensagem,
+      read: false,
+    });
 
-      getAtividadesByAluno: (alunoId) => {
-        const { activities } = get();
-// Retorna o valor calculado pela função.
-        return activities.filter(a => a.alunoId === alunoId);
-      },
+    await supabase.from('notifications').insert({
+      user_id: receiverId,
+      title: 'Nova mensagem',
+      message: `${currentUser.nome} enviou uma mensagem.`,
+      type: 'mensagem',
+      read: false,
+      resolved: false,
+    });
 
-      getAtividadesByProfessor: (professorId) => {
-        const { activities } = get();
-// Retorna o valor calculado pela função.
-        return activities.filter(a => a.professorId === professorId);
-      },
+    await Promise.all([get().refreshMessages(), get().refreshNotifications()]);
+  },
 
-      getMensagensByAluno: (alunoId, professorId) => {
-        const { messages } = get();
-// Retorna o valor calculado pela função.
-        return messages.filter(m => 
+  markNotificationAsRead: async (notificationId) => {
+    await supabase.from('notifications').update({ read: true }).eq('id', notificationId);
+    await get().refreshNotifications();
+  },
+
+  markNotificationAsResolved: async (notificationId, resolution) => {
+    await supabase
+      .from('notifications')
+      .update({
+        resolved: true,
+        resolution,
+      })
+      .eq('id', notificationId);
+
+    await get().refreshNotifications();
+  },
+
+  getUnreadNotifications: (userId) =>
+    get().notifications.filter((n) => n.userId === userId && !n.read),
+
+  getPendingNotifications: (userId) =>
+    get()
+      .notifications
+      .filter((n) => n.userId === userId && !n.resolved)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+
+  getResolvedNotifications: (userId) =>
+    get()
+      .notifications
+      .filter((n) => n.userId === userId && n.resolved)
+      .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime()),
+
+  getAlunosByProfessor: (professorId) =>
+    get().users.filter(
+      (u) => u.role === 'aluno' && u.professorId === professorId && u.status === 'aprovado'
+    ),
+
+  getAtividadesByAluno: (alunoId) =>
+    get().activities.filter((a) => a.alunoId === alunoId),
+
+  getAtividadesByProfessor: (professorId) =>
+    get().activities.filter((a) => a.professorId === professorId),
+
+  getMensagensByAluno: (alunoId, professorId) =>
+    get()
+      .messages
+      .filter(
+        (m) =>
           (m.senderId === alunoId && m.receiverId === professorId) ||
           (m.senderId === professorId && m.receiverId === alunoId)
-        ).sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime());
-      },
+      )
+      .sort((a, b) => a.createdAt.getTime() - b.createdAt.getTime()),
 
-      getConversasByProfessor: (professorId) => {
-        const { messages, users } = get();
-        const alunos = users.filter(u => u.role === 'aluno' && u.professorId === professorId);
-        
-// Retorna o valor calculado pela função.
-        return alunos.map(aluno => {
-          const msgs = messages.filter(m => 
-            (m.senderId === aluno.id && m.receiverId === professorId) ||
-            (m.senderId === professorId && m.receiverId === aluno.id)
-          ).sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
+  getConversasByProfessor: (professorId) => {
+    const alunos = get().users.filter((u) => u.role === 'aluno' && u.professorId === professorId);
 
-          const ultima = msgs[0];
-          const naoLidas = msgs.filter(m => m.receiverId === professorId && !m.read).length;
+    return alunos
+      .map((aluno) => {
+        const msgs = get()
+          .messages
+          .filter(
+            (m) =>
+              (m.senderId === aluno.id && m.receiverId === professorId) ||
+              (m.senderId === professorId && m.receiverId === aluno.id)
+          )
+          .sort((a, b) => b.createdAt.getTime() - a.createdAt.getTime());
 
-// Retorna objeto ou estado dentro da função.
-          return {
-            alunoId: aluno.id,
-            alunoNome: aluno.nome,
-            ultimaMensagem: ultima?.message || '',
-            dataUltimaMensagem: ultima?.createdAt || new Date(),
-            naoLidas,
-          };
-        }).filter(c => c.ultimaMensagem).sort((a, b) => b.dataUltimaMensagem.getTime() - a.dataUltimaMensagem.getTime());
-      },
+        const ultima = msgs[0];
+        const naoLidas = msgs.filter((m) => m.receiverId === professorId && !m.read).length;
 
-      getProfessorByCodigo: (codigo) => {
-        const { users } = get();
-// Retorna o valor calculado pela função.
-        return users.find(u => u.role === 'professor' && u.codigo === codigo);
-      },
+        return {
+          alunoId: aluno.id,
+          alunoNome: aluno.nome,
+          ultimaMensagem: ultima?.message || '',
+          dataUltimaMensagem: ultima?.createdAt || new Date(0),
+          naoLidas,
+        };
+      })
+      .filter((c) => c.ultimaMensagem)
+      .sort((a, b) => b.dataUltimaMensagem.getTime() - a.dataUltimaMensagem.getTime());
+  },
 
-      getProfessorCode: (professorId) => {
-        const { users } = get();
-        const professor = users.find(u => u.id === professorId && u.role === 'professor');
-// Retorna o valor calculado pela função.
-        return professor?.codigo;
-      },
+  getProfessorByCodigo: (codigo) =>
+    get().users.find((u) => u.role === 'professor' && u.codigo === codigo),
 
-      getAlunoById: (alunoId) => {
-        const { users } = get();
-// Retorna o valor calculado pela função.
-        return users.find(u => u.id === alunoId && u.role === 'aluno');
-      },
-    }),
-    {
-      name: 'eduplatform-storage',
-      onRehydrateStorage: () => (state) => {
-      if (!state) return;
-// Declara função toDate que processa dados ou eventos.
-      const toDate = (v: unknown): Date => (v instanceof Date ? v : new Date(v as string | number));
-      state.notifications = state.notifications.map(n => ({ ...n, createdAt: toDate(n.createdAt) }));
-      state.activities = state.activities.map(a => ({ ...a, createdAt: toDate(a.createdAt) }));
-      state.messages = state.messages.map(m => ({ ...m, createdAt: toDate(m.createdAt) }));
-      state.users = state.users.map(u => ({ ...u, dataCadastro: toDate(u.dataCadastro) }));
-      }
-    }
-  )
-);
+  getProfessorCode: (professorId) =>
+    get().users.find((u) => u.id === professorId && u.role === 'professor')?.codigo,
+
+  getAlunoById: (alunoId) =>
+    get().users.find((u) => u.id === alunoId && u.role === 'aluno'),
+
+  getProfessorByAluno: (alunoId) => {
+    const aluno = get().users.find((u) => u.id === alunoId && u.role === 'aluno');
+    if (!aluno?.professorId) return undefined;
+    return get().users.find((u) => u.id === aluno.professorId && u.role === 'professor');
+  },
+}));

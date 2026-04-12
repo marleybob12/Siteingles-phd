@@ -30,11 +30,11 @@ export function useLogin() {
     setError('');
     setIsLoading(true);
     await new Promise(r => setTimeout(r, 1000));
-    const result = login(email, senha);
+    const result = await login(email, senha);
     if (!result.success) {
       setError(result.message || 'Erro ao fazer login');
-      setIsLoading(false);
     }
+    setIsLoading(false);
   };
 
 // Retorna objeto ou estado dentro da função.

@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { motion, AnimatePresence } from 'framer-motion';
 import { useAuthStore } from '@/store/authStore';
 
@@ -9,29 +9,41 @@ import EnglishModulesPage from '@/pages/EnglishModulesPage';
 import ProfessorDashboard from '@/pages/ProfessorDashboard';
 import StudentDashboard from '@/pages/StudentDashboard';
 
-export type Page = 'home' | 'login' | 'register' | 'english-modules' | 'professor-dashboard' | 'student-dashboard';
+export type Page =
+  | 'home'
+  | 'login'
+  | 'register'
+  | 'english-modules'
+  | 'professor-dashboard'
+  | 'student-dashboard';
 
 function App() {
   const [currentPage, setCurrentPage] = useState<Page>('home');
-  const { isAuthenticated, currentUser, logout } = useAuthStore();
+  const { isAuthenticated, currentUser, logout, initializeAuth } = useAuthStore();
+
+  useEffect(() => {
+    initializeAuth();
+  }, [initializeAuth]);
 
   const navigateTo = (page: Page) => {
     setCurrentPage(page);
     window.scrollTo({ top: 0, behavior: 'smooth' });
   };
 
-  const handleLogout = () => {
-    logout();
+  useEffect(() => {
+    if (isAuthenticated && currentUser) {
+      if (currentUser.role === 'professor') {
+        setCurrentPage('professor-dashboard');
+      } else if (currentUser.role === 'aluno') {
+        setCurrentPage('student-dashboard');
+      }
+    }
+  }, [isAuthenticated, currentUser]);
+
+  const handleLogout = async () => {
+    await logout();
     setCurrentPage('home');
   };
-
-  const authenticatedPage: Page | null = isAuthenticated && currentUser
-    ? currentUser.role === 'professor'
-      ? 'professor-dashboard'
-      : 'student-dashboard'
-    : null;
-
-  const activePage = authenticatedPage ?? currentPage;
 
   const pageVariants = {
     initial: { opacity: 0, y: 20 },
@@ -42,7 +54,7 @@ function App() {
   const renderPage = () => {
     const pageProps = { navigateTo, onLogout: handleLogout };
 
-    switch (activePage) {
+    switch (currentPage) {
       case 'home':
         return <HomePage key="home" navigateTo={navigateTo} />;
       case 'login':
@@ -64,7 +76,7 @@ function App() {
     <div className="min-h-screen bg-[#f7f9fa] font-sans">
       <AnimatePresence mode="wait">
         <motion.div
-          key={activePage}
+          key={currentPage}
           initial="initial"
           animate="animate"
           exit="exit"

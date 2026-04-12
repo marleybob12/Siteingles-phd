@@ -1,10 +1,11 @@
-// Tipos da Plataforma de Ensino
-
 export type UserRole = 'professor' | 'aluno' | null;
-
 export type UserStatus = 'pendente' | 'aprovado' | 'rejeitado';
-
-export type ActivityCorrectionStatus = 'pendente' | 'em_analise' | 'correta' | 'incorreta' | 'devolvida';
+export type ActivityCorrectionStatus =
+  | 'pendente'
+  | 'em_analise'
+  | 'correta'
+  | 'incorreta'
+  | 'devolvida';
 
 export interface User {
   id: string;
@@ -12,13 +13,12 @@ export interface User {
   documento: string;
   role: UserRole;
   nome: string;
-  codigo?: string; // Código único do professor (apenas para professores)
-  codigoProfessor?: string; // Código informado pelo aluno no cadastro
+  codigo?: string;
+  codigoProfessor?: string;
   status: UserStatus;
-  professorId?: string; // ID do professor vinculado (apenas para alunos)
-  // Curso e módulo adquirido pelo aluno
+  professorId?: string;
   cursoAdquirido?: 'ingles' | 'enem';
-  moduloAdquirido?: string; // ID do módulo (ex: "ingles-2" para 2 aulas/semana)
+  moduloAdquirido?: string;
   dataCadastro: Date;
 }
 
@@ -29,25 +29,10 @@ export interface Notification {
   message: string;
   type: 'autorizacao' | 'atividade' | 'mensagem' | 'sistema' | 'correcao';
   read: boolean;
-  resolved: boolean; // Nova flag para notificações resolvidas
-  resolution?: 'aprovado' | 'rejeitado'; // Tipo de resolução
+  resolved: boolean;
+  resolution?: 'aprovado' | 'rejeitado';
   createdAt: Date;
-  data?: unknown;
-}
-
-export interface Activity {
-  id: string;
-  professorId: string;
-  alunoId: string;
-  curso: 'ingles' | 'enem';
-  titulo: string;
-  descricao: string;
-  anexos: Attachment[];
-  status: 'pendente' | 'concluida';
-  correctionStatus: ActivityCorrectionStatus; // Status de correção
-  correctionFeedback?: string; // Feedback do professor
-  createdAt: Date;
-  resposta?: ActivityResponse;
+  data?: any;
 }
 
 export interface Attachment {
@@ -62,6 +47,21 @@ export interface ActivityResponse {
   conteudo: string;
   arquivo?: Attachment;
   enviadoEm: Date;
+}
+
+export interface Activity {
+  id: string;
+  professorId: string;
+  alunoId: string;
+  curso: 'ingles' | 'enem';
+  titulo: string;
+  descricao: string;
+  anexos: Attachment[];
+  status: 'pendente' | 'concluida';
+  correctionStatus: ActivityCorrectionStatus;
+  correctionFeedback?: string;
+  createdAt: Date;
+  resposta?: ActivityResponse;
 }
 
 export interface ChatMessage {
@@ -79,27 +79,4 @@ export interface ChatConversation {
   ultimaMensagem: string;
   dataUltimaMensagem: Date;
   naoLidas: number;
-}
-
-export interface Curso {
-  id: string;
-  nome: string;
-  slug: 'ingles' | 'enem';
-  descricao: string;
-  imagem: string;
-}
-
-export interface Turma {
-  id: string;
-  professorId: string;
-  curso: 'ingles' | 'enem';
-  alunos: string[];
-}
-
-export interface EnglishModule {
-  id: string;
-  aulas: number;
-  titulo: string;
-  descricao: string;
-  preco: string;
 }

@@ -1,6 +1,7 @@
 import { useEffect, useRef, useState } from 'react';
 import { useAuthStore } from '@/store/authStore';
 import { useCursorEffect } from '@/hooks/useCursorEffect';
+import { supabase } from '@/lib/supabase';
 import type { UserRole } from '@/types';
 
 export type Step = 'curso' | 'dados';
@@ -44,7 +45,7 @@ export function useRegister() {
   const [validandoCodigo, setValidandoCodigo] = useState(false);
   const validationTimerRef = useRef<ReturnType<typeof setTimeout> | null>(null);
 
-  const { register, getProfessorByCodigo } = useAuthStore();
+  const { register } = useAuthStore();
 
   useCursorEffect();
 
@@ -79,9 +80,16 @@ export function useRegister() {
     }
 
     setValidandoCodigo(true);
-    validationTimerRef.current = setTimeout(() => {
-      const professor = getProfessorByCodigo(nextCode.trim());
-      setCodigoValido(Boolean(professor));
+    validationTimerRef.current = setTimeout(async () => {
+      const normalizedCode = nextCode.trim().toUpperCase();
+      const { data: professorRow } = await supabase
+        .from('users')
+        .select('id')
+        .eq('role', 'professor')
+        .eq('codigo', normalizedCode)
+        .single();
+
+      setCodigoValido(Boolean(professorRow));
       setValidandoCodigo(false);
       validationTimerRef.current = null;
     }, 500);
@@ -122,15 +130,14 @@ export function useRegister() {
         setError('Informe o código do professor');
         return;
       }
-      const professor = getProfessorByCodigo(codigoProfessor.trim().toUpperCase());
-      if (!professor) {
+      if (codigoValido === false) {
         setError('Código do professor inválido.');
         return;
       }
     }
     setIsLoading(true);
     await new Promise(resolve => setTimeout(resolve, 1500));
-    const result = register({
+    const result = await register({
       email,
       senha,
       documento,
