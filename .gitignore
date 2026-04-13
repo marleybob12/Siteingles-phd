@@ -1,4 +1,5 @@
 .vercel
+.env
 
 # Ignore app build and dependencies
 app/dist/
